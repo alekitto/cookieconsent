@@ -1,5 +1,4 @@
-import 'core-js/es6/symbol';
-import 'core-js/fn/symbol/iterator';
+import 'core-js/es/symbol';
 import CookieConsent from './lib/CookieConsent';
 
 const cookieConsent = new CookieConsent();

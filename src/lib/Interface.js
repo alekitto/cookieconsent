@@ -6,20 +6,21 @@ export default class Interface {
 
   constructor() {
     this.elements = {};
+    this.config = window.CookieConsent.config;
   }
 
 
   buildStyle() {
     return el('style',
-      '#cconsent-bar, #cconsent-bar * { box-sizing:border-box }', 
-      '#cconsent-bar { background-color:' + window.CookieConsent.config.theme.barColor + '; color:' + window.CookieConsent.config.theme.barTextColor + '; padding:15px; text-align:right; font-family:sans-serif; font-size:14px; line-height:18px; position:fixed; bottom:0; left:0; width:100%; z-index:9998; transform: translateY(0); transition: transform .6s ease-in-out; transition-delay: .3s;}', 
-      '#cconsent-bar.ccb--hidden {transform: translateY(100%); display:block;}', 
+      '#cconsent-bar, #cconsent-bar * { box-sizing:border-box }',
+      '#cconsent-bar { background-color:' + this.config.theme.barColor + '; color:' + this.config.theme.barTextColor + '; padding:15px; text-align:right; font-family:sans-serif; font-size:14px; line-height:18px; position:fixed; bottom:0; left:0; width:100%; z-index:9998; transform: translateY(0); transition: transform .6s ease-in-out; transition-delay: .3s;}',
+      '#cconsent-bar.ccb--hidden {transform: translateY(100%); display:block;}',
       '#cconsent-bar .ccb__wrapper { display:flex; flex-wrap:wrap; justify-content:space-between; max-width:1800px; margin:0 auto;}',
       '#cconsent-bar .ccb__left { align-self:center; text-align:left; margin: 15px 0;}',
       '#cconsent-bar .ccb__right { align-self:center; white-space: nowrap;}',
       '#cconsent-bar .ccb__right > div {display:inline-block; color:#FFF;}',
-      '#cconsent-bar a { text-decoration:underline; color:' + window.CookieConsent.config.theme.barTextColor + '; }',
-      '#cconsent-bar button { line-height:normal; font-size:14px; border:none; padding:10px 10px; color:' + window.CookieConsent.config.theme.barMainButtonTextColor + '; background-color:' + window.CookieConsent.config.theme.barMainButtonColor + ';}',
+      '#cconsent-bar a { text-decoration:underline; color:' + this.config.theme.barTextColor + '; }',
+      '#cconsent-bar button { line-height:normal; font-size:14px; border:none; padding:10px 10px; color:' + this.config.theme.barMainButtonTextColor + '; background-color:' + this.config.theme.barMainButtonColor + ';}',
       '#cconsent-bar a.ccb__edit { margin-right:15px }',
       '#cconsent-bar a:hover, #cconsent-bar button:hover { cursor:pointer; }',
       '#cconsent-modal { display:none; font-size:14px; line-height:18px; color:#666; width: 100vw; height: 100vh; position:fixed; left:0; top:0; right:0; bottom:0; font-family:sans-serif; font-size:14px; background-color:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;}',
@@ -65,8 +66,8 @@ export default class Interface {
       '#cconsent-modal .ccm__content > .ccm__content__body .ccm__tab-content .ccm__list .ccm__list__title {color:#333; font-weight:600;}',
       '#cconsent-modal .ccm__content > .ccm__content__body .ccm__tab-content .ccm__list ul { margin:15px 0; padding-left:15px }',
       '#cconsent-modal .ccm__footer { padding:35px; background-color:#EFEFEF; text-align:center; display: flex; align-items:center; justify-content:flex-end; }',
-      '#cconsent-modal .ccm__footer button { line-height:normal; font-size:14px; transition: background-color .5s ease-out; background-color:' + window.CookieConsent.config.theme.modalMainButtonColor + '; color:' + window.CookieConsent.config.theme.modalMainButtonTextColor + '; border:none; padding:13px; min-width:110px; border-radius: 2px; cursor:pointer; }',
-      '#cconsent-modal .ccm__footer button:hover { background-color:' + Utilities.lightenDarkenColor(window.CookieConsent.config.theme.modalMainButtonColor, -20) + '; }',
+      '#cconsent-modal .ccm__footer button { line-height:normal; font-size:14px; transition: background-color .5s ease-out; background-color:' + this.config.theme.modalMainButtonColor + '; color:' + this.config.theme.modalMainButtonTextColor + '; border:none; padding:13px; min-width:110px; border-radius: 2px; cursor:pointer; }',
+      '#cconsent-modal .ccm__footer button:hover { background-color:' + Utilities.lightenDarkenColor(this.config.theme.modalMainButtonColor, -20) + '; }',
       '#cconsent-modal .ccm__footer button#ccm__footer__consent-modal-submit {  margin-right:10px; }'
       );
   }
@@ -75,12 +76,12 @@ export default class Interface {
     return el('div#cconsent-bar.ccb--hidden',
         el(`div.ccb__wrapper`,
           el('div.ccb__left',
-            el('div.cc-text', Language.getTranslation(window.CookieConsent.config, window.CookieConsent.config.language.current, 'barMainText'))
+            el('div.cc-text', Language.getTranslation(this.config, this.config.language.current, 'barMainText'))
           ),
           el('div.ccb__right',
             el('div.ccb__button',
-              el('a.ccb__edit', Language.getTranslation(window.CookieConsent.config, window.CookieConsent.config.language.current, 'barLinkSetting')),
-              el('button.consent-give', Language.getTranslation(window.CookieConsent.config, window.CookieConsent.config.language.current, 'barBtnAcceptAll'))
+              el('a.ccb__edit', Language.getTranslation(this.config, this.config.language.current, 'barLinkSetting')),
+              el('button.consent-give', Language.getTranslation(this.config, this.config.language.current, 'barBtnAcceptAll'))
             )
           )
         ),
@@ -90,54 +91,51 @@ export default class Interface {
   buildModal() {
 
     // Cookie names list middleware
-    var listCookies = function(category) {
-      var list = [];
-
-      for(let service in window.CookieConsent.config.services) {
-        (window.CookieConsent.config.services[service].category === category) && list.push(window.CookieConsent.config.services[service]);
+    const listCookies = category => {
+      const list = [];
+      for (let service in this.config.services) {
+        (this.config.services[service].category === category) && list.push(this.config.services[service]);
       }
-      
-      if(list.length) {
-        
-        var listItems = [];
-        
-        for(let item in list) {
-          listItems.push(el('li', Language.getTranslation(list[item], window.CookieConsent.config.language.current, 'name')));
+
+      if (list.length) {
+        const listItems = [];
+        for (let item in list) {
+          listItems.push(el('li', Language.getTranslation(list[item], this.config.language.current, 'name')));
         }
 
-        return [el('div.ccm__list', el('span.ccm__list__title', Language.getTranslation(window.CookieConsent.config, window.CookieConsent.config.language.current, 'modalAffectedSolutions')), el('ul', listItems))];
+        return [el('div.ccm__list', el('span.ccm__list__title', Language.getTranslation(this.config, this.config.language.current, 'modalAffectedSolutions')), el('ul', listItems))];
       }
-    }
-    
-    function modalTabGroups() {
+    };
+
+    const modalTabGroups = () => {
 
       let contentItems = [];
 
       let i = 0;
-      for (let key in window.CookieConsent.config.categories) {
+      for (let key in this.config.categories) {
 
-        contentItems.push(el('dl.ccm__tabgroup' + '.' + key + ((window.CookieConsent.config.categories[key].checked) ? '.checked-5jhk' : ''), {'data-category':key},
-                            el('dt.ccm__tab-head', Language.getTranslation(window.CookieConsent.config.categories[key], window.CookieConsent.config.language.current, 'name'),
-                              el('a.ccm__tab-head__icon-wedge', 
+        contentItems.push(el('dl.ccm__tabgroup' + '.' + key + ((this.config.categories[key].checked) ? '.checked-5jhk' : ''), {'data-category':key},
+                            el('dt.ccm__tab-head', Language.getTranslation(this.config.categories[key], this.config.language.current, 'name'),
+                              el('a.ccm__tab-head__icon-wedge',
                                 el(document.createElementNS("http://www.w3.org/2000/svg", "svg"), { version: "1.2", preserveAspectRatio: "none", viewBox: "0 0 24 24", class: "icon-wedge-svg", "data-id": "e9b3c566e8c14cfea38af128759b91a3", style: "opacity: 1; mix-blend-mode: normal; fill: rgb(51, 51, 51); width: 32px; height: 32px;"},
                                   el(document.createElementNS("http://www.w3.org/2000/svg", "path"), { 'xmlns:default': "http://www.w3.org/2000/svg", class: "icon-wedge-angle-down", d: "M17.2,9.84c0-0.09-0.04-0.18-0.1-0.24l-0.52-0.52c-0.13-0.13-0.33-0.14-0.47-0.01c0,0-0.01,0.01-0.01,0.01  l-4.1,4.1l-4.09-4.1C7.78,8.94,7.57,8.94,7.44,9.06c0,0-0.01,0.01-0.01,0.01L6.91,9.6c-0.13,0.13-0.14,0.33-0.01,0.47  c0,0,0.01,0.01,0.01,0.01l4.85,4.85c0.13,0.13,0.33,0.14,0.47,0.01c0,0,0.01-0.01,0.01-0.01l4.85-4.85c0.06-0.06,0.1-0.15,0.1-0.24  l0,0H17.2z", style: "fill: rgb(51, 51, 51);" })
                                 )
                               ),
                             ),
                             el('dd.ccm__tab-content',
-                              el('div.ccm__tab-content__left', 
-                                ( ! window.CookieConsent.config.categories[key].needed) && el('div.ccm__switch-component', el('div.status-off', Language.getTranslation(window.CookieConsent.config, window.CookieConsent.config.language.current, 'off')),
+                              el('div.ccm__tab-content__left',
+                                ( ! this.config.categories[key].needed) && el('div.ccm__switch-component', el('div.status-off', Language.getTranslation(this.config, this.config.language.current, 'off')),
                                 el('div.ccm__switch-group',
                                   el('label.ccm__switch',
-                                    el('input.category-onoff', {type:'checkbox', 'data-category': key, 'checked': window.CookieConsent.config.categories[key].checked}),
+                                    el('input.category-onoff', {type:'checkbox', 'data-category': key, 'checked': this.config.categories[key].checked}),
                                     el('span.ccm__switch__slider')
                                   )
                                 ),
-                                el('div.status-on', Language.getTranslation(window.CookieConsent.config, window.CookieConsent.config.language.current, 'on')))
+                                el('div.status-on', Language.getTranslation(this.config, this.config.language.current, 'on')))
                               ),
                               el('div.right',
-                                el('h3', Language.getTranslation(window.CookieConsent.config.categories[key], window.CookieConsent.config.language.current, 'name')),
-                                el('p', Language.getTranslation(window.CookieConsent.config.categories[key], window.CookieConsent.config.language.current, 'description')),
+                                el('h3', Language.getTranslation(this.config.categories[key], this.config.language.current, 'name')),
+                                el('p', Language.getTranslation(this.config.categories[key], this.config.language.current, 'description')),
                                 el('div.ccm__list',
                                   listCookies(key)
                                 )
@@ -155,10 +153,10 @@ export default class Interface {
     return el('div#cconsent-modal',
       el('div.ccm__content',
         el('div.ccm__content__heading',
-          el('h2', Language.getTranslation(window.CookieConsent.config, window.CookieConsent.config.language.current, 'modalMainTitle')),
+          el('h2', Language.getTranslation(this.config, this.config.language.current, 'modalMainTitle')),
           el('p',
-            Language.getTranslation(window.CookieConsent.config, window.CookieConsent.config.language.current, 'modalMainText'),
-            (window.CookieConsent.config.modalMainTextMoreLink) ? el('a', { href: window.CookieConsent.config.modalMainTextMoreLink, target: '_blank', rel: 'noopener noreferrer' }, Language.getTranslation(window.CookieConsent.config, window.CookieConsent.config.language.current, 'learnMore')) : null
+            Language.getTranslation(window.CookieConsent.config, this.config.language.current, 'modalMainText'),
+            (this.config.modalMainTextMoreLink) ? el('a', { href: this.config.modalMainTextMoreLink, target: '_blank', rel: 'noopener noreferrer' }, Language.getTranslation(this.config, this.config.language.current, 'learnMore')) : null
           ),
           el('div.ccm__cheading__close', '×')
         ),
@@ -168,22 +166,21 @@ export default class Interface {
           )
         ),
         el('div.ccm__footer',
-          el('button#ccm__footer__consent-modal-submit', Language.getTranslation(window.CookieConsent.config, window.CookieConsent.config.language.current, 'modalBtnSave')),
-          el('button.consent-give', Language.getTranslation(window.CookieConsent.config, window.CookieConsent.config.language.current, 'modalBtnAcceptAll'))
+          el('button#ccm__footer__consent-modal-submit', Language.getTranslation(this.config, this.config.language.current, 'modalBtnSave')),
+          el('button.consent-give', Language.getTranslation(this.config, this.config.language.current, 'modalBtnAcceptAll'))
         )
       )
     );
   }
 
   modalRedrawIcons() {
-    var tabGroups = this.elements['modal'].querySelectorAll('.ccm__tabgroup');
-
+    const tabGroups = this.elements['modal'].querySelectorAll('.ccm__tabgroup');
     for(let tabGroup of tabGroups) {
-      if(window.CookieConsent.config.categories[tabGroup.dataset.category].checked) {
+      if(this.config.categories[tabGroup.dataset.category].checked) {
         if( ! tabGroup.classList.contains('checked-5jhk')) {
           tabGroup.classList.add('checked-5jhk');
           tabGroup.querySelector('input.category-onoff').checked = true;
-        };
+        }
       } else {
         if(tabGroup.classList.contains('checked-5jhk')) tabGroup.classList.remove('checked-5jhk');
         tabGroup.querySelector('input.category-onoff').checked = false;
@@ -199,7 +196,7 @@ export default class Interface {
       callback(elem);
       return elem;
     } else {
-      var insertedElem = mount(document.body, elem);
+      const insertedElem = mount(document.body, elem);
       if (insertedElem) {
         this.elements[name] = insertedElem;
       }
@@ -210,54 +207,52 @@ export default class Interface {
 
   buildInterface(callback) {
 
-    if (typeof callback === 'undefined') callback = function(){};
-    var that = this;
+    if (typeof callback === 'undefined') {
+      callback = () => {};
+    }
 
-    Utilities.ready(function() {
-
-      that.render('style', that.buildStyle());
-
-      that.render('bar', that.buildBar(), (bar) => {
+    Utilities.ready(() => {
+      this.render('style', this.buildStyle());
+      this.render('bar', this.buildBar(), (bar) => {
 
         // Show the bar after a while
-        if ( ! window.CookieConsent.config.cookieExists) {
+        if ( ! this.config.cookieExists) {
           setTimeout(() => {
             bar.classList.remove('ccb--hidden');
-          }, window.CookieConsent.config.barTimeout);
+          }, this.config.barTimeout);
         }
       });
 
-      that.render('modal', that.buildModal());
+      this.render('modal', this.buildModal());
 
       callback();
     });
   }
 
-  addEventListeners(elements) {
+  addEventListeners() {
 
     // If you click Accept all cookies
-    var buttonConsentGive = document.querySelectorAll('.consent-give');
+    const buttonConsentGive = document.querySelectorAll('.consent-give');
 
     for(let button of buttonConsentGive) {
       button.addEventListener('click', () => {
-  
+
         // We set config to full consent
-        for(let key in window.CookieConsent.config.categories) {
-          window.CookieConsent.config.categories[key].wanted =
-          window.CookieConsent.config.categories[key].checked = true;
+        for(let key in this.config.categories) {
+          this.config.categories[key].wanted = this.config.categories[key].checked = true;
         }
-        
+
         this.writeBufferToDOM();
-  
+
         this.buildCookie((cookie) => {
           this.setCookie(cookie);
         });
-  
+
         this.elements['bar'].classList.add('ccb--hidden');
         this.elements['modal'].classList.remove('ccm--visible');
 
         this.modalRedrawIcons();
-  
+
       });
     }
 
@@ -277,16 +272,16 @@ export default class Interface {
       if (event.target.classList.contains('ccm__tab-head') || event.target.classList.contains('ccm__tab-head__icon-wedge')) {
 
         function getDlParent(eventTarget) {
-          var parent = eventTarget.parentNode;
+          const parent = eventTarget.parentNode;
           if(parent.nodeName !== 'DL') {
             return getDlParent(parent);
           } else {
             return parent;
           }
         }
-        
-        var parentDl = getDlParent(event.target);
-        
+
+        const parentDl = getDlParent(event.target);
+
         if(parentDl.classList.contains('ccm__tabgroup--open')) {
           parentDl.classList.remove('ccm__tabgroup--open');
         } else {
@@ -296,10 +291,10 @@ export default class Interface {
 
       // If you click on/off switch
       if (event.target.classList.contains('category-onoff')) {
-        window.CookieConsent.config.categories[event.target.dataset.category].wanted =
-        window.CookieConsent.config.categories[event.target.dataset.category].checked = (event.target.checked === true) ? true : false;
+        this.config.categories[event.target.dataset.category].wanted =
+            this.config.categories[event.target.dataset.category].checked = event.target.checked === true;
 
-        var dt = document.querySelector('.ccm__tabgroup.' + event.target.dataset.category);
+        const dt = document.querySelector('.ccm__tabgroup.' + event.target.dataset.category);
         if(event.target.checked === false && dt.classList.contains('checked-5jhk')) {
           dt.classList.remove('checked-5jhk');
         } else {
@@ -339,13 +334,13 @@ export default class Interface {
   writeBufferToDOM() {
 
     for(let action of window.CookieConsent.buffer.appendChild) {
-      if (window.CookieConsent.config.categories[action.category].wanted === true) {
+      if (this.config.categories[action.category].wanted === true) {
         Node.prototype.appendChild.apply(action.this, action.arguments);
       }
     }
 
     for(let action of window.CookieConsent.buffer.insertBefore) {
-      if (window.CookieConsent.config.categories[action.category].wanted === true) {
+      if (this.config.categories[action.category].wanted === true) {
         action.arguments[1] = (action.arguments[0].parentNode === null) ? action.this.lastChild : action.arguments[1];
         Node.prototype.insertBefore.apply(action.this, action.arguments);
       }
@@ -354,27 +349,29 @@ export default class Interface {
 
   buildCookie(callback) {
     let cookie = {
-      version: window.CookieConsent.config.cookieVersion,
+      version: this.config.cookieVersion,
       categories: {},
       services: []
     };
-    
-    for(let key in window.CookieConsent.config.categories) {
+
+    for(let key in this.config.categories) {
       cookie.categories[key] = {
-        wanted: window.CookieConsent.config.categories[key].wanted,
+        wanted: this.config.categories[key].wanted,
       };
     }
 
     cookie.services = Utilities.listGlobalServices();
-  
+
     if (callback) callback(cookie);
     return cookie;
   }
-  
+
   setCookie(cookie, callback) {
     const expires_in = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
 
-    document.cookie = `cconsent=${JSON.stringify(cookie)}; expires=${expires_in}; path=/;`;
-    if (callback) callback();
+    document.cookie = `cconsent=${JSON.stringify(cookie)}; expires=${expires_in}; path=/; SameSite=Lax;`;
+    if (callback) {
+      callback();
+    }
   }
 }

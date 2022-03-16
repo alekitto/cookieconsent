@@ -92,7 +92,7 @@ export default class Configuration {
     document.cookie.split(';').filter((item) => {
 
       if (item.indexOf('cconsent') >= 0) {
-        var cookieData = JSON.parse(item.split('=')[1]);
+        const cookieData = JSON.parse(item.split('=')[1]);
 
         // We check cookie version. If older we need to renew cookie.
         if (typeof cookieData.version === 'undefined') {
@@ -123,7 +123,7 @@ export default class Configuration {
 
         // We we integrate cookie data into the global config object
         for (let key in cookieData.categories) {
-          window.CookieConsent.config.categories[key].checked = window.CookieConsent.config.categories[key].wanted = (cookieData.categories[key].wanted === true) ? true : false;
+          window.CookieConsent.config.categories[key].checked = window.CookieConsent.config.categories[key].wanted = cookieData.categories[key].wanted === true;
         }
 
         window.CookieConsent.config.cookieExists = true;
